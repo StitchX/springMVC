@@ -1,6 +1,6 @@
 # 一、SpringMVC简介
 
-## 1、什么是MVC
+### 1、什么是MVC
 
 MVC是一种软件架构的思想，将软件按照模型、视图、控制器来划分
 
@@ -19,7 +19,7 @@ MVC的工作流程：
 
 用户通过视图层发送请求到服务器，在服务器中请求Controller接收，Controller调用相应的Model层处理请求，处理完毕将结果返回到Controller，Controller再根据请求处理的结果找到相应的View视图，渲染数据后最终响应给浏览器
 
-## 2、什么是SpringMVC
+### 2、什么是SpringMVC
 
 SpringMVC是Spring的一个后续产品，是一个子项目
 
@@ -40,7 +40,7 @@ servlet：init、service、destory三个周期：
       2. 记录登录成功，放到session中
    4. 根据service处理后的结果响应浏览器
 
-## 3、SpringMVC的特点
+### 3、SpringMVC的特点
 
 - **Spring家族原生产品**，与IOC容器等基础设施无缝对接
 - **基于原生的Servlet**，通过了功能强大的**前端控制器DispatcherServlet**，对请求和响应进行统一处理
@@ -48,3 +48,78 @@ servlet：init、service、destory三个周期：
 - **代码清晰简洁**，大幅度提升开发效率
 - 内部组件化程度高，可插拔式组件**即插即用**，想要什么功能配置相应组件即可
 - **性能卓著**，尤其适合现代大型、超大型互联网项目要求
+
+
+
+# 二、HelloWorld
+
+### 1、开发环境
+
+IDE：idea 2023.2.4
+
+构建工具：maven 3.9.9
+
+服务器：tomcat10
+
+Spring版本：6
+
+jdk：21
+
+### 2、创建maven工程
+
+1、创建父工程springMVC，修改maven版本，创建子模块
+
+![image-20241225223616183](./assets/image-20241225223616183.png)
+
+2、配置打包方式
+
+![image-20241225233110683](./assets/image-20241225233110683.png)
+
+3、导入依赖
+
+```
+<dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>6.1.12</version>
+        </dependency>
+
+        <!-- 日志
+        https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.12</version>
+<!--            <scope>test</scope>-->
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf-spring6 -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring6</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+
+
+
+    </dependencies>
+```
+
+4、添加web模块
+
+![image-20241225234747488](./assets/image-20241225234747488.png)
+
+![image-20241225234811394](./assets/image-20241225234811394.png)
+
+5、配置web.xml
+
