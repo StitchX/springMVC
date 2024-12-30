@@ -71,11 +71,15 @@ jdk：21
 
 ![image-20241225223616183](./assets/image-20241225223616183.png)
 
-2、配置打包方式
+2、
+
+#### a、打包方式war
 
 ![image-20241225233110683](./assets/image-20241225233110683.png)
 
-3、导入依赖
+3、
+
+#### b、导入依赖
 
 ```
 <dependencies>
@@ -115,11 +119,19 @@ jdk：21
     </dependencies>
 ```
 
-4、添加web模块
+4、
+
+#### c、添加web模块
 
 ![image-20241225234747488](./assets/image-20241225234747488.png)
 
 ![image-20241225234811394](./assets/image-20241225234811394.png)
 
-5、配置web.xml
+### 3、配置web.xml
+
+注册springMVC的前端控制器DispatcherServlet
+
+#### a、默认配置方式
+
+
 
