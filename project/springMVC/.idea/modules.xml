@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/springMVC.iml" filepath="$PROJECT_DIR$/springMVC.iml" />
-      <module fileurl="file://$PROJECT_DIR$/springMVC-demo01.iml" filepath="$PROJECT_DIR$/springMVC-demo01.iml" />
     </modules>
   </component>
 </project>

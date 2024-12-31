@@ -71,11 +71,15 @@ jdk：21
 
 ![image-20241225223616183](./assets/image-20241225223616183.png)
 
-2、配置打包方式
+2、
+
+#### a、打包方式war
 
 ![image-20241225233110683](./assets/image-20241225233110683.png)
 
-3、导入依赖
+3、
+
+#### b、导入依赖
 
 ```
 <dependencies>
@@ -123,7 +127,9 @@ jdk：21
 </dependencies>
 ```
 
-4、添加web模块
+4、
+
+#### c、添加web模块
 
 ![image-20241225234747488](./assets/image-20241225234747488.png)
 
@@ -131,6 +137,7 @@ jdk：21
 
 ### 3、配置web.xml
 
+<<<<<<< HEAD
 注册SpringMVC的前端控制器DispatcherServlet
 
 #### a、**默认配置方式**
@@ -217,4 +224,11 @@ import org.springframework.stereotype.Controller;
 public class HelloController {
 }
 ```
+=======
+注册springMVC的前端控制器DispatcherServlet
+
+#### a、默认配置方式
+
+
+>>>>>>> f667a291244c1affe38b58d5f46fe2ab79a79118
 
