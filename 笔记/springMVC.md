@@ -79,40 +79,48 @@ jdk：21
 
 ```
 <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>6.1.12</version>
-        </dependency>
+    <!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>6.1.12</version>
+    </dependency>
 
-        <!-- 日志
-        https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.12</version>
-<!--            <scope>test</scope>-->
-        </dependency>
+    <!-- 日志
+    https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.5.12</version>
+        <!--            <scope>test</scope>-->
+    </dependency>
 
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-            <scope>provided</scope>
-        </dependency>
+    <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+     当前使用的tomcat10不能使用这个javax.servlet-->
+<!--        <dependency>-->
+<!--            <groupId>javax.servlet</groupId>-->
+<!--            <artifactId>javax.servlet-api</artifactId>-->
+<!--            <version>4.0.1</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
-        <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf-spring6 -->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf-spring6</artifactId>
-            <version>3.1.2.RELEASE</version>
-        </dependency>
+    <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+    <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>6.0.0</version>
+        <scope>provided</scope>
+    </dependency>
 
 
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf-spring6 -->
+    <dependency>
+        <groupId>org.thymeleaf</groupId>
+        <artifactId>thymeleaf-spring6</artifactId>
+        <version>3.1.2.RELEASE</version>
+    </dependency>
 
-    </dependencies>
+</dependencies>
 ```
 
 4、添加web模块
@@ -121,5 +129,92 @@ jdk：21
 
 ![image-20241225234811394](./assets/image-20241225234811394.png)
 
-5、配置web.xml
+### 3、配置web.xml
+
+注册SpringMVC的前端控制器DispatcherServlet
+
+#### a、**默认配置方式**
+
+此配置作用下，SpringMVC的配置文件默认位于WEB-INF下，默认名称为<servlet-name>-servlet.xml，例如，以下配置所对应SpringMVC的配置文件位于WEB-INF下，文件名为springMVC-servlet.xml
+
+```
+<!-- 配置springMVC的前端控制器，对浏览器发送的请求进行统一处理 -->
+<servlet>
+    <servlet-name>SpringMVC</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SpringMVC</servlet-name>
+    <!-- 设置springMVC的核心控制器所能处理的请求的请求路径
+    所匹配的请求可以是/login或.htm1或.js或.css方式的请求路径
+    但是/不能匹配.jsp请求路径的请求
+    /*包括所有包括.jsp请求
+    -->
+    <url-pattern>/</url-pattern>
+</servlet-mapping>
+```
+
+#### b、扩展配置方式
+
+可通过init-param标签设置SpringMVC配置文件的位置和名称，通过load-on-startup标签设置SpringMVC前端控制器DispatcherServlet的初始化时间
+
+```
+<!-- 配置springMVC的前端控制器，对浏览器发送的请求进行统一处理 -->
+<servlet>
+    <servlet-name>SpringMVC</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <!-- 配置SpringMVC配置文件的位置和名称 -->
+    <init-param>
+        <!-- contextConfigLocation为固定值 -->
+        <param-name>contextConfigLocation</param-name>
+        <!-- 使用classpath:表示从类路径査找配置文件，例如maven工程中的src/main/resources -->
+        <param-value>classpath:springMVC.xml</param-value>
+    </init-param>
+    <!-- 作为框架的核心组件，在启动过程中有大量的初始化操作要做而这些
+    操作放在第一次请求时才执行会严重影响访问速度因此需要通过此标签将启动
+    控制DispatcherServlet的初始化时间提前到服务器启动时-->
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SpringMVC</servlet-name>
+    <!-- 设置springMVC的核心控制器所能处理的请求的请求路径
+    所匹配的请求可以是/login或.htm1或.js或.css方式的请求路径
+    但是/不能匹配.jsp请求路径的请求
+    -->
+    <url-pattern>/</url-pattern>
+</servlet-mapping>
+```
+
+> 注：
+>
+> <url-pattern>标签中使用/和/*的区别:*
+>
+> *(所匹配的请求可以是/login或.html或.js或.css方式的请求路径，但是/不能匹配.jsp请求路径的请求*
+>
+> *因此就可以避免在访问isp页面时，该请求被DispatcherServet处理，从而找不到相应的页面*
+>
+> */*则能够匹配所有请求，例如在使用过滤器时，若需要对所有请求进行过滤，就需要使用/*的写法
+
+
+
+### 4、创建请求控制器
+
+由于前端控制器对浏览器发送的请求进行了统一的处理，但是具体的请求有不同的处理过程，因此需要创建处理具
+体请求的类，即请求控制器
+
+请求控制器中每一个处理请求的方法成为控制器方法
+
+因为SpringMVC的控制器由一个POJO(普通的java类)担任，因此需要通过@Controller注解将其标识为一个控制层组件，交给Spring的loC容器管理，此时SpringMVC才能够识别控制器的存在
+
+```
+package com.atguigu.mvc.controller;
+
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class HelloController {
+}
+```
 
