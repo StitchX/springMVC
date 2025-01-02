@@ -27,7 +27,7 @@ SpringMVC是Spring为表述层开发提供的一套完备的解决方案。在�
 
 > 注：三层架构分为表述层（或表示层）、业务逻辑层、数据访问层，表述层表示前台页面和后台servlet
 
-![image-20241224230132457](./assets/image-20241224230132457.png)
+![image-20241224230132457](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241224230132457.png)
 
 servlet：init、service、destory三个周期：
 
@@ -59,7 +59,7 @@ IDE：idea 2023.2.4
 
 构建工具：maven 3.9.9
 
-服务器：tomcat10
+服务器：tomcat 11.0.2 （主要是支持java21）
 
 Spring版本：6
 
@@ -69,17 +69,13 @@ jdk：21
 
 1、创建父工程springMVC，修改maven版本，创建子模块
 
-![image-20241225223616183](./assets/image-20241225223616183.png)
+![image-20241225223616183](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225223616183.png)
 
-2、
+2、配置打包方式
 
-#### a、打包方式war
+![image-20241225233110683](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225233110683.png)
 
-![image-20241225233110683](./assets/image-20241225233110683.png)
-
-3、
-
-#### b、导入依赖
+3、导入依赖
 
 ```
 <dependencies>
@@ -127,17 +123,14 @@ jdk：21
 </dependencies>
 ```
 
-4、
+4、添加web模块
 
-#### c、添加web模块
+![image-20241225234747488](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225234747488.png)
 
-![image-20241225234747488](./assets/image-20241225234747488.png)
-
-![image-20241225234811394](./assets/image-20241225234811394.png)
+![image-20241225234811394](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225234811394.png)
 
 ### 3、配置web.xml
 
-<<<<<<< HEAD
 注册SpringMVC的前端控制器DispatcherServlet
 
 #### a、**默认配置方式**
@@ -215,6 +208,8 @@ jdk：21
 
 因为SpringMVC的控制器由一个POJO(普通的java类)担任，因此需要通过@Controller注解将其标识为一个控制层组件，交给Spring的loC容器管理，此时SpringMVC才能够识别控制器的存在
 
+![image-20241231134949757](./assets/image-20241231134949757.png)
+
 ```
 package com.atguigu.mvc.controller;
 
@@ -224,11 +219,298 @@ import org.springframework.stereotype.Controller;
 public class HelloController {
 }
 ```
-=======
-注册springMVC的前端控制器DispatcherServlet
 
-#### a、默认配置方式
+### 5、创建配置springMVC的配置文件
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 
->>>>>>> f667a291244c1affe38b58d5f46fe2ab79a79118
+    <!-- 扫描组件 -->
+    <context:component-scan base-package="com.atguigu.mvc.controller"/>
 
+    <!-- 配置thymeleaf视图解析器 -->
+    <!-- Configure Thymeleaf template resolver -->
+    <bean id="templateResolver" class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML" />
+        <property name="characterEncoding" value="UTF-8" />
+        <!-- 其他可选配置，如cacheable等 -->
+    </bean>
+    <!-- Configure Thymeleaf template engine -->
+    <bean id="templateEngine" class="org.thymeleaf.spring6.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+        <!-- 其他可选配置，如additionalDialects, additionalEngines等 -->
+    </bean>
+    <bean id="viewResolver" class="org.thymeleaf.spring6.view.ThymeleafViewResolver">
+        <property name="order" value="1"/>
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8" />
+        <!-- 其他可选配置，如contentType, order等 -->
+    </bean>
+
+</beans>
+```
+
+没有用上的部分笔记：
+
+![image-20241231133934714](./assets/image-20241231133934714.png)
+
+### 6、测试HelloWorld
+
+#### a、实现对首页的访问
+
+在请求控制器中创建处理请求的方法
+
+```
+//@RequestMapping注解：处理请求和控制器方法之间的映射关系
+//@RequestMapping注解的va1ue属性可以通过请求地址匹配请求，/表示的当前工程的上下文路径
+//localhost:8080/springMvc/
+@RequestMapping("/")
+public String index(){
+//    设置视图名称
+    return "index";
+}
+```
+
+```
+package com.atguigu.mvc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * @Description: 实际代码
+ * @Author Eva
+ * @Date 2024/12/30 22:45
+ */
+
+@Controller
+public class HelloController {
+//    "/"-->/WEB-INF/template/index.html
+    @RequestMapping(value = "/")
+    public String index(){
+//        返回视图名称
+        return "index";
+    }
+}
+```
+
+![image-20241231134701242](./assets/image-20241231134701242.png)
+
+![image-20241231134718358](./assets/image-20241231134718358.png)
+
+![image-20241231134731178](./assets/image-20241231134731178.png)
+
+#### b、通过超链接跳转到指定页面
+
+```
+<!DOCTYPE html>
+<html lang="en" xmlns:th="www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+<h1>首页</h1>
+<p>href="/target"<br>
+    少一个上下文路径：/springMVC，由于可以改，每次上下文路径修改则代码就会变
+    不使用下面方法，会直接访问localhost:8080<br>
+    使用thymeaf语法解析属性，下面是格式，自动添加上下文路径
+</p>
+<a th:href="@{/target}">访问目标页面target.html</a>
+</body>
+</html>
+```
+
+![image-20241231135833931](./assets/image-20241231135833931.png)
+
+![image-20241231135758077](./assets/image-20241231135758077.png)
+
+最后：
+
+![image-20241231135954959](./assets/image-20241231135954959.png)
+
+### 7、总结
+
+浏览器发送请求，若请求地址符合前端控制器的url-pattern，该请求就会被前端控制器DispatcherServlet处理前端控制器会读取SpringMVC的核心配置文件，通过扫描组件找到控制器，将请求地址和控制器中@RequestMapping注解的value属性值进行匹配，若匹配成功，该注解所标识的控制器方法就是处理请求的方法。处理请求的方法需要返回一个字符串类型的视图名称，该视图名称会被视图解析器解析，加上前缀和后缀组成视图的路径，通过Thymeleaf对视图进行消染，最终转发到视图所对应页面
+
+---
+
+重新创建模块：
+
+1、和demo01创建方式一样
+
+![image-20241231141746627](./assets/image-20241231141746627.png)
+
+2、引入依赖，和demo01一样
+
+![image-20241231141812306](./assets/image-20241231141812306.png)
+
+3、在web.xml注册前端控制器。先将当前的maven工程添加web模块
+
+![image-20241231141939843](./assets/image-20241231141939843.png)
+
+![image-20241231141947517](./assets/image-20241231141947517.png)
+
+4、注册DispatcherServlet前端控制器
+
+![image-20241231142315592](./assets/image-20241231142315592.png)
+
+5、添加spring的配置文件
+
+![image-20241231142416641](./assets/image-20241231142416641.png)
+
+6、访问首页，web-inf的页面
+
+标识为控制层组件
+
+![image-20250102162845702](./assets/image-20250102162845702.png)
+
+扫描组件
+
+![image-20250102163128998](./assets/image-20250102163128998.png)
+
+配置视图解析器
+
+![image-20250102163156482](./assets/image-20250102163156482.png)
+
+根据视图解析器的前后缀，创建目录和首页
+
+![image-20250102163340639](./assets/image-20250102163340639.png)
+
+控制器中写方法，访问首页
+
+浏览器发送请求 - > DispatcherServlet解析地址和控制器方法中的request-mapping使用的属性值匹配 ->根据返回的名称返回视图名称 ->视图解析器解析，加入前后缀 ->找到页面，返回页面
+
+![image-20250102164136301](./assets/image-20250102164136301.png)
+
+配置tomcat
+
+![image-20250102164203222](./assets/image-20250102164203222.png)
+
+![image-20250102164310631](./assets/image-20250102164310631.png)
+
+![image-20250102164330606](./assets/image-20250102164330606.png)
+
+
+
+# 三、RequestMapping注解
+
+### 1、@RequestMapping注解的功能
+
+从注解名称上我们可以看到，@RequestMapping注解的作用就是将请求和处理请求的控制器方法关联起来，建立
+映射关系。
+
+SpringMVC 接收到指定的请求，就会来找到在映射关系中对应的控制器方法来处理这个请求。
+
+### 2、@RequestMapping注解的位置
+
+```
+@Controller
+@RequestMapping("/hello")
+public class RequestMappingController {
+
+    @RequestMapping("/testRequestMapping")
+    public String success(){
+        return "sucess";
+    }
+}
+```
+
+环境：
+
+![image-20250102174420890](./assets/image-20250102174420890.png)
+
+@RequestMapping标识一个类：设置映射请求的请求路径的初始信息
+
+![image-20250102174125681](./assets/image-20250102174125681.png)
+
+@RequestMapping标识一个方法：设置映射请求请求路径的具体信息
+
+![image-20250102174349230](./assets/image-20250102174349230.png)
+
+重复会报错：
+
+![image-20250102174103900](./assets/image-20250102174103900.png)
+
+### 3、@RequestMapping注解value的属性
+
+@RequestMapping注解的value属性通过请求的请求地址匹配请求映射
+
+@RequestMapping注解的value属性是一个字符串类型的数组，表示该请求映射能够匹配多个请求地址所对应的请求
+
+@RequestMapping注解的value属性必须设置，至少通过请求地址匹配请求映射
+
+```
+<a th:href="@{/hello/testRequestMapping}">测试RequestMapping注解的value属性 ->/testRequestMapping</a><br>
+<a th:href="@{/hello/test}">测试RequestMapping注解的value属性 ->/test</a><br>
+```
+
+```
+@RequestMapping(
+        value = {"/testRequestMapping","/test"}
+)
+public String success(){
+    return "sucess";
+}
+```
+
+
+
+测试：
+
+![image-20250102180109540](./assets/image-20250102180109540.png)
+
+![image-20250102180137057](./assets/image-20250102180137057.png)
+
+查看属性的方法：
+
+![image-20250102175136657](./assets/image-20250102175136657.png)
+
+### 4、@RequestMapping注解method的属性
+
+@RequestMapping注解的method属性通过请求的请求方式(get或post)匹配请求映射
+
+@RequestMapping注解的method属性是一个RequestMethod类型的数组，表示该请求映射能够匹配多种请求方式的请求
+
+若当前请求的请求地址满足请求映射的value属性，但是请求方式不满足method属性，则浏览器报错405:Request method 'POST' not supported
+
+### 5、@RequestMapping注解params的属性(了解)
+
+
+
+### 6、@RequestMapping注解header的属性(了解)
+
+
+
+### 7、SpringMVC支持ant风格的路径
+
+
+
+### 8、SpringMVC支持路径中的占位符(重点)
+
+
+
+
+
+## 四、SpringMVC获取请求参数
+
+
+
+### 1、通过servletAPI获取
+
+
+
+### 2、通过控制器方法的参数获取
