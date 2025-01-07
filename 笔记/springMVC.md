@@ -487,29 +487,142 @@ public String success(){
 
 若当前请求的请求地址满足请求映射的value属性，但是请求方式不满足method属性，则浏览器报错405:Request method 'POST' not supported
 
+```
+<form th:action = "@{/test}" method="post">
+    <input type="submit" value="测试RequestMapping注解的method属性 ->post">
+</form>
+```
+
+```
+@RequestMapping(
+        value = {"/testRequestMapping","/test"},
+//            不写下面的method，则
+        method = {RequestMethod.GET, RequestMethod.POST}
+)
+public String success(){
+    return "sucess";
+}
+```
+
+> 注
+> 1、对于处理指定请求方式的控制器方法，SpringMVC中提供了@RequestMapping的派生注解
+>
+> 处理get请求的映射-->@GetMapping
+> 处理post请求的映射-->@PostMapping
+> 处理put请求的映射-->@PutMapping
+> 处理delete请求的映射->@DeleteMapping
+>
+> 2、常用的请求方式有get，post，put，delete
+>
+> 但是目前浏览器只支持get和post，若在form表单提交时，为method设置了其他请求方式的字符申(put或delete)，则按照默认的请求方式get处理
+>
+> 若要发送put和delete请求，则需要通过spring提供的过滤器HiddenHttpMethodfilter，在restful部分会讲到
+
+
+
 ### 5、@RequestMapping注解params的属性(了解)
 
+@RequestMapping注解的params属性通过请求的请求参数匹配请求映射
 
+@RequestMapping注解的params属性是一个字符串类型的数组，可以通过四种表达式设置请求参数和请求映射的匹配关系
+"param":要求请求映射所匹配的请求必须携带param请求参数
+
+"!param":要求请求映射所匹配的请求必须不能携带param请求参数
+
+"param=value":要求请求映射所匹配的请求必须携带param请求参数目param=value
+
+"param!=value”:要求请求映射所匹配的请求必须携带param请求参数但是param!=value
+
+```
+<a th:href="@{/testParamsAndHeaders(username='admin',password=12345)}">测试RequestMapping的params属性 -->/testParamsAndHeaders</a><br>
+```
+
+```
+@RequestMapping(
+        value = "/testParamsAndHeaders",
+        params = {"username","password=12345"} // params = {"!username","password!=12345"} 代表不能有username和...
+)
+public String testParamsAndHeaders(){
+    return "success";
+}
+```
+
+> 注:
+> 若当前请求满足@RequestMapping注解的value和method属性，但是不满足params属性，此时页面回报错400: Parameter conditions "username, password!=123456" not met for actual request parameters:username={admin}, password={123456}
 
 ### 6、@RequestMapping注解header的属性(了解)
 
+> @RequestMapping注解的headers属性通过请求的请求头信息匹配请求映射
+>
+> @RequestMapping注解的headers属性是一个字符串类型的数组，可以通过四种表达式设置请求头信息和请求映射的匹配关系
+> "header":要求请求映射所匹配的请求必须携带header请求头信息
+>
+> "!header":要求请求映射所匹配的请求必须不能携带header请求头信息
+>
+> "header=value":要求请求映射所匹配的请求必须携带header请求头信息且header=value
+>
+> "header!=value”:要求请求映射所匹配的请求必须携带header请求头信息目header!=value
+>
+> 若当前请求满足@RequestMapping注解的value和method属性，但是不满足headers属性，此时页面显示404错误，即资源未找到
 
+![image-20250107142923602](./assets/image-20250107142923602.png)
 
 ### 7、SpringMVC支持ant风格的路径
 
+? ：表示任意的单个字符
 
+*：表示任意的0个或多个字符
+
+**：表示任意的一层或多层目录
+
+注意：在使用\*\*时，只能使用/**/xxx的方式
+
+![image-20250107143319715](./assets/image-20250107143319715.png)
+
+![image-20250107143425896](./assets/image-20250107143425896.png)
+
+![image-20250107143558741](./assets/image-20250107143558741.png)
 
 ### 8、SpringMVC支持路径中的占位符(重点)
 
+原始方式：/deleteUser?id=1
 
+rest方式：/deleteUser/1
+
+SpringMVC路径中的占位符常用于restful风格中，当请求路径中将某些数据通过路径的方式传输到服务器中，就可以在相应的@RequestMapping注解的value属性中通过占位符{xxx)表示传输的数据，在通过@PathVariable注解，将占位符所表示的数据赋值给控制器方法的形参
+
+```
+<a th:href="@{/testRest/1/admin}">测试路径中的占位符-->/testRest</a><br>
+```
+
+```
+@RequestMapping("/testPath/{id}/{username}") // "/a**a/testAnt" 这样写是错的
+public String testPath(@PathVariable("id")Integer id,@PathVariable("username")String username){
+    System.out.println("id:"+id);
+    System.out.println("username:"+username);
+    return "success";
+}
+```
 
 
 
 ## 四、SpringMVC获取请求参数
 
+### 1、通过ServletAPI获取
 
+将HttpServletRequest作为控制器方法的形参，此时HttpServletRequest类型的参数表示封装了当前请求的请求
+报文的对象
 
-### 1、通过servletAPI获取
+```
+@RequestMapping("/testServletAPI")
+//形参位置的request表示当前请求
+public String testServletAPI(HttpServletRequest request){
+    String username = request.getParameter("username");
+    String pwd = request.getParameter("pwd");
+    System.out.println("username:"+username+",password:"+pwd);
+    return "success";
+}
+```
 
 
 
