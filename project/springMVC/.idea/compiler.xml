@@ -11,4 +11,10 @@
       </profile>
     </annotationProcessing>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="springMVC-demo01" options="" />
+      <module name="springMVC-demo02" options="" />
+    </option>
+  </component>
 </project>
