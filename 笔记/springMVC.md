@@ -27,7 +27,7 @@ SpringMVC是Spring为表述层开发提供的一套完备的解决方案。在�
 
 > 注：三层架构分为表述层（或表示层）、业务逻辑层、数据访问层，表述层表示前台页面和后台servlet
 
-![image-20241224230132457](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241224230132457.png)
+![image-20241224230132457](.\assets\image-20241224230132457.png)
 
 servlet：init、service、destory三个周期：
 
@@ -69,11 +69,11 @@ jdk：21
 
 1、创建父工程springMVC，修改maven版本，创建子模块
 
-![image-20241225223616183](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225223616183.png)
+![image-20241225223616183](.\assets\image-20241225223616183.png)
 
 2、配置打包方式
 
-![image-20241225233110683](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225233110683.png)
+![image-20241225233110683](.\assets\image-20241225233110683.png)
 
 3、导入依赖
 
@@ -125,9 +125,9 @@ jdk：21
 
 4、添加web模块
 
-![image-20241225234747488](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225234747488.png)
+![image-20241225234747488](.\assets\image-20241225234747488.png)
 
-![image-20241225234811394](C:\Users\QMacroQA\Desktop\code\springMVC\笔记\assets\image-20241225234811394.png)
+![image-20241225234811394](.\assets\image-20241225234811394.png)
 
 ### 3、配置web.xml
 
@@ -685,38 +685,411 @@ defaultValue：不管required属性值为true或false，当value所指定的请�
 
 ![image-20250125223232416](./assets/image-20250125223232416.png)
 
-解决方案：上上图框的部分
+解决方案：上上图大红框的部分
 
 ![image-20250125223313261](./assets/image-20250125223313261.png)
+
+两种会话依赖技术？
+
+session依赖cookie；session是服务端的会话技术、cookie是客户端的；cookie的生命周期是浏览器的开启到关闭；第一次请求，getSession()方法会校验请求报文请求是否携带jsessionID中的cookie，没有，第一次创建session对象：创建HTTPSession对象，session放在服务器所维护的map集合中，并且创建一个cookie，cookie的键是固定的是jsessionID，值是一个随机序列，常说的UUID，将HTTPSession对象放在服务器所维护的map集合中，这个随机序列作为map集合的键，session对象作为map集合的值来存储在服务器的内部，cookie响应到浏览器
 
 ### 6、通过POJO获取请求参数
 
 可以在控制器方法的形参位置设置一个实体类类型的形参，此时若浏览器传输的请求参数的参数名和实体类中的属性名一致，那么请求参数就会为此属性赋值
 
+```
+<form th:action="@{/testBean}" method="post">
+    用户名：<input type="text" name="username"><br>
+    密码：<input type="password" name="password"><br>
+    性别：<input type="radio" name="sex" value="女">女<input type="radio" name="sex" value="男">男<br>
+    年龄：<input type="text" name="age"><br>
+    邮箱：<input type="text" name="email"><br>
+    <input type="submit" value="使用实体类接收请求参数">
+</form>
+```
+
+```
+@RequestMapping("/testBean")
+public String testBean(User user){
+    System.out.println(user);
+    return "success";
+}
+```
+
 
 
 ### 7、解决获取请求参数的乱码问题
 
+新版本没有乱码问题！
+
+**会遇到新问题**，就是下列的init-param加上后会报错，所以后面删除了
+
+解决获取请求参数的乱码问题，可以使用SpringMVC提供的编码过滤器CharacterEncodingFilter，但是必须在web.xml中进行注册
+
+```
+<!-- 配置SpringMVC的编码过滤器 -->
+<filter>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+        <param-name>encoding</param-name>
+        <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+        <param-name>forceResponseEncoding</param-name>
+        <param-value>UTF-8</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <url-pattern>*/</url-pattern>
+</filter-mapping>
+```
+
+> 注:
+> SpringMVC中处理编码的过滤留一定要配置到其他过滤留之前，否则无效
+
+使用springMVC自带的编码过滤器，注册在web.xml上就行。这里涉及到设置的位置，为什么设置在filter上，servletContext -> filter -> servlet
+
+---
+
+前置准备：
+
+![image-20250128232332063](./assets/image-20250128232332063.png)
+
+前置知识：
+
+数据需要发送到页面，需要将这些数据在域对象中共享。
+
+四个域对象：
+
+一、ServletContext 
+
+1、生命周期：当Web应用被加载进容器时创建代表**整个web应用**的ServletContext对象，当服务器关闭或Web应用被移除时，ServletContext对象跟着销毁。 
+
+**服务器的开启和关闭**
+
+2、作用范围：整个Web应用（应用范围）。
+
+二、HttpSession 
+
+1、生命周期：（会话范围）在第一次调用 request.getSession() 方法时，服务器会检查是否已经有对应的session,如果没有就在内存 中创建一个session并返回。 
+
+浏览器开启和浏览器关闭，和服务器没有关系，因为有
+**钝化和活化**：服务器关闭，浏览器未关闭
+
+2、作用范围：一次会话。
+
+三、ServletRequest 
+
+1、生命周期：在**service 方法调用**前由服务器创建，传入service方法。整个请求结束，request生命结束。 
+
+**一次请求**
+
+2、作用范围：（请求范围）整个请求链（请求转发也存在）。
+
+四、PageContext 
+
+用的少
+
+1、生命周期：当对JSP的请求时开始，当响应结束时销毁。 
+
+2、作用范围：（页面范围）整个JSP页面，是四大作用域中最小的一个
 
 
 
+知识点：
+
+![image-20250129003829483](./assets/image-20250129003829483.png)
+
+前置准备：
+
+1. 新建springMVC-demo03
+2. 复制依赖的pom.xml
+3. 添加web.xml，并配置，与demo02一样
+4. 创建package com.atguigu.mvc.controller.TestController
+5. 添加并配置springMVC.xml
+6. 创建index.html首页
+7. 在TestController配置请求映射
+
+问题：少复制了东西，导致初始失败
+
+![image-20250129182317467](./assets/image-20250129182317467.png)
 
 ## 五、域对象共享数据
 
-1、使用servletAPI向request域对象共享数据
+### 1、使用servletAPI向request域对象共享数据
+
+```
+//    使用servletAPI向request域对象共享数据
+@RequestMapping("testRequestByServletAPI")
+public String testRequestByServletAPI(HttpServletRequest request){
+    request.setAttribute("testRequestScope","hello,servletAPI");
+    return "success";
+}
+```
+
+### 2、使用ModelAndView向request域对象共享数据
+
+```
+/**
+ * 重要：无论用什么方式最终都会把数据包装成ModelAndView
+ * ModelAndView有Model和View的功能
+ * Model主要用于向请求域共享数据
+ * View主要用于设置视图，实现页面跳转
+ */
+@RequestMapping("testModelAndView")
+public ModelAndView testModelAndView(){
+    ModelAndView mav = new ModelAndView();
+//        回顾：控制器设置视图名称，视图解析器进行解析后找到最终页面
+//        处理模型数据，即向请求域request共享数据
+    mav.addObject("testRequestScope","hello,ModelAndView");
+//        设置视图名称
+    mav.setViewName("success");
+    return mav;
+}
+```
+
+### 3、使用Model向request域对象共享数据
+
+```
+@RequestMapping("/testModel")
+public String testModel(Model model){
+    model.addAttribute("testRequestScope","hello,model");
+    return "success";
+}
+```
+
+### 4、使用map向request域对象共享数据
+
+```
+@RequestMapping("/testMap")
+public String testMap(Map<String, Object> map){
+    map.put("testRequestScope","hello,map");
+    return "success";
+}
+```
+
+### 5、使用ModelMap向request域
+
+```
+@RequestMapping("/testModelMap")
+public String testModelMap(ModelMap modelMap){
+    modelMap.addAttribute("testRequestScope","hello,ModelMap");
+    return "success";
+}
+```
+
+### 6、Model、ModelMap、Map的关系
+
+Model、ModelMap、Map的类型的参数其实本质上都是BindingAwareModelMap类型的
+
+用的同一个对象实例化的
+
+```
+public interface Model {}
+public class ModelMap extends LinkedHashMap<String, Object> {}
+public class ExtendedModelMap extends ModelMap implements Model {}
+public class BindingAwareModelMap extends ExtendedModelMap {}
+```
+
+![image-20250130205936465](./assets/image-20250130205936465.png)
+
+查看源码：
+
+![image-20250130210107373](./assets/image-20250130210107373.png)
+
+### 7、向session域共享数据
+
+```java
+@RequestMapping("/testSession")
+public String testSession(HttpSession session){
+    session.setAttribute("testSessionScope","hello,session");
+    return "success";
+}
+```
+
+建议使用原生的方式，比较简单
+
+### 8、向application域共享数据
+
+```java
+@RequestMapping("/testApplication")
+public String testApplication(HttpSession session){
+    ServletContext application = session.getServletContext();
+    session.setAttribute("testApplicationScope","hello,application");
+    return "success";
+}
+```
+
+# 六、SpringMVC的视图
+
+SpringMVC中的视图是View接口，视图的作用渲染数据，将模型Model中的数据展示给用户
+
+SpringMVC视图的种类很多，默认有转发视图InternalResourceView和重定向视图RedirectView
+
+当工程引入jstl的依赖，转发视图会自动转换为JstIView
+
+若使用的视图技术为Thymeleaf，在SpringMVC的配置文件中配置了Thymeleaf的视图解析器，由此视图解析器解析之后所得到的是ThymeleafView
+
+### 1、ThymeleafView
+
+当控制器方法中所设置的视图名称没有任何前缀时，此时的视图名称会被SpringMVC配置文件中所配置的视图解析器解析，视图名称拼接视图前缀和视图后缀所得到的最终路径，会通过转发的方式实现跳转
+
+```
+@RequestMapping("/testThymeleafView")
+public String testThymeleafView(){
+    return "success";
+}
+```
+
+![image-20250131225043999](./assets/image-20250131225043999.png)
+
+### 2、转发视图
+
+SpringMVC中默认的转发视图是InternalResourceView
+
+SpringMVC中创建转发视图的情况:
+
+当控制器方法中所设置的视图名称以"forward:"为前缀时，创建IntenalResourceView视图，此时的视图名称不会被SpringMVC配置文件中所配置的视图解析器解析，而是会将前缀"forward:"去掉，剩余部分作为最终路径通过转发的方式实现跳转
+
+例如"forward:/","forward:/employee'
+
+```
+@RequestMapping("/testForward")
+public String testForward(){
+    return "forward:testThymeleafView";
+}
+```
+
+![image-20250131230919732](./assets/image-20250131230919732.png)
+
+### 3、重定向视图
+
+SpringMVC中默认的重定向视图是RedirectView
+
+当控制器方法中所设置的视图名称以"redirect:"为前缀时，创建RedirectView视图，此时的视图名称不会被SpringMVC配置文件中所配置的视图解析器解析，而是会将前缀"redirect:"去掉，剩余部分作为最终路径通过重定向的方式实现跳转
+
+例如"redirect:/","redirect:/employee"
+
+```
+@RequestMapping("/testRedirect")
+public String testRedirect(){
+    return "redirect:/testThymeleafView";
+}
+```
+
+![image-20250131231224667](./assets/image-20250131231224667.png)
+
+> 注：
+>
+> 重定向视图在解析时，会先将redirect:前缀去掉，然后会判断剩余部分是否以/开头，若是则会自动拼接上下文路径
+>
+> 转发和重定向的区别：
+>
+> 转发：服务器端二次请求
+>
+> 重定向：浏览器二次请求，浏览器地址栏可见，可跨域
+
+### 4、视图控制器view-controller
+
+当控制器方法中，**仅仅用来实现页面跳转**，即只需要设置视图名称时，可以将处理器方法使用view-controller标签进行表示
+
+```
+<mvc:view-controller path="/" view-name="index"></mvc:view-controller>
+```
+
+> 注:
+> 当SpringMVC中设置任何一个view-controller时，其他控制器中的请求映射将全部失效，此时需要在SpringMVC的核心配置文件中设置开启mvc注解驱动的标签:
+>
+> <mvc:annotation-driven />
+
+![image-20250201001502611](./assets/image-20250201001502611.png)
+
+![image-20250201001526644](./assets/image-20250201001526644.png)
 
 
 
-2、使用ModelAndView向request域对象共享数据
+补充：InternalResourceViewResolver
+
+jsp页面的跳转
+
+![image-20250201195209810](./assets/image-20250201195209810.png)
+
+![image-20250201195227283](./assets/image-20250201195227283.png)
+
+# 七、RESTFul
+
+### 1、RESTFul简介
+
+REST：**R**epresentational **S**tate **T**ransfer，表现层资源状态转移。
+
+#### a>资源
+
+资源是一种看待服务器的方式，即，将服务器看作是由很多离散的资源组成。每个资源是服务器上一个可命名的抽象概念。因为资源是一个抽象的概念，所以它不仅仅能代表服务器文件系统中的一个文件、数据库中的一张表等等具体的东西，可以将资源设计的要多抽象有多抽象，只要想象力允许而且客户端应用开发者能够理解。与面向对象设计类似，资源是以名词为核心来组织的，首先关注的是名词。一个资源可以由一个或多个URI来标识。URI既是资源的名称，也是资源在Web上的地址。对某个资源感兴趣的客户端应用，可以通过资源的URI与其进行交互。
+
+#### b>资源的表述
+
+资源的表述是一段对于资源在某个特定时刻的状态的描述。可以在客户端-服务器端之间转移(交换)。资源的表述可以有多种格式，例如HTML/XML/JSON/纯文本/图片/视频/音频等等。资源的表述格式可以通过协商机制来确定。请求-响应方向的表述通常使用不同的格式。
+
+#### c>资源转移
+
+状态转移说的是:在客户端和服务器端之间转移(transfer)代表资源状态的表述。通过转移和操作资源的表述来间接实现操作资源的目的。
 
 
 
-3、使用Model向request域对象共享数据
+### 2、RESTFul的实现
+
+具体说，就是 HTTP 协议里面，四个表示操作方式的动词:GET、POST、PUT、DELETE
+
+它们分别对应四种基本操作:GET用来获取资源，POST 用来新建资源，PUT用来更新资源，DELETE 用来删除资源
+
+REST 风格提倡 URL 地址使用统一的风格设计，从前到后各个单词使用斜杠分开，不使用问号键值对方式携带请求参数，而是将要发送给服务器的数据作为 URL地址的一部分，以保证整体风格的一致性。
+
+| 操作     | 传统方式         | REST风格                |
+| -------- | ---------------- | ----------------------- |
+| 查询操作 | getUserById?id=1 | user/1-->get请求方式    |
+| 保存操作 | saveUser         | user-->post请求方式     |
+| 删除操作 | deleteUser?id=1  | user/1-->delete请求方式 |
+| 更新操作 | updateUser       | user-->put请求方式      |
 
 
 
-4、使用map向request域对象共享数据
+### 3、HiddenHttpMethodFilter
+
+由于浏览器只支持发送get和post方式的请求，那么该如何发送put和delete请求呢?
+
+SpringMVC 提供了 **HiddenHttpMethodFilter** 帮助我们将 POST 请求转换为 **DELETE** 或 PUT 请求
+
+**HiddenHttpMethodFilter** 处理put和delete请求的条件:
+
+a>当前请求的请求方式必须为post
+
+b>当前请求必须传输请求参数_method
 
 
 
-5、使用ModelMap向request域
+
+
+## 八、RESTFul案例
+
+
+
+### 1、准备工作
+
+
+
+### 2、功能清单
+
+
+
+
+
+### 3、具体功能：访问首页
+
+#### a>配置view-controller
+
+
+
+b>创建
+
