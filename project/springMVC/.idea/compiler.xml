@@ -6,7 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="springMVC-rest05" />
         <module name="springMVC-jsp04" />
+        <module name="springMVC-demo06" />
         <module name="springMVC-demo03" />
         <module name="springMVC-demo01" />
         <module name="springMVC-demo02" />
@@ -18,6 +20,10 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="springMVC-demo01" options="" />
       <module name="springMVC-demo02" options="" />
+      <module name="springMVC-demo03" options="" />
+      <module name="springMVC-demo06" options="" />
+      <module name="springMVC-jsp04" options="" />
+      <module name="springMVC-rest05" options="" />
     </option>
   </component>
 </project>

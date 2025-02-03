@@ -1067,21 +1067,87 @@ a>当前请求的请求方式必须为post
 
 b>当前请求必须传输请求参数_method
 
+![image-20250202000001681](./assets/image-20250202000001681.png)
 
+![image-20250201235856027](./assets/image-20250201235856027.png)
 
-
+![image-20250201235925772](./assets/image-20250201235925772.png)
 
 ## 八、RESTFul案例
 
-
-
 ### 1、准备工作
 
+![image-20250202001102925](./assets/image-20250202001102925.png)
 
+![image-20250202001150070](./assets/image-20250202001150070.png)
+
+```
+package com.atguigu.mvc.dao;
+
+import com.atguigu.mvc.bean.Employee;
+import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @Description:
+ * @Author Eva
+ * @Date 2025/2/2 0:07
+ */
+
+@Repository
+public class EmployeeDao {
+    private static Map<Integer, Employee> employees = null;
+    static {
+        employees = new HashMap<Integer, Employee>();
+        employees.put(1001,new Employee(1001,"E-AA","aa@163.com", 1));
+        employees.put(1002,new Employee(1002,"E-BB","bb@163.com", 1));
+        employees.put(1003,new Employee(1003,"E-CC","cc@163.com", 0));
+        employees.put(1004,new Employee(1004,"E-DD","dd@163.com", 0));
+        employees.put(1005,new Employee(1005,"E-EE","ee@163.com", 1));
+    }
+
+    private static Integer initId = 1006;
+
+    public void save(Employee employee){
+        if (employee.getId()==null){
+            employee.setId(initId++);
+        }
+        employees.put(employee.getId(),employee);
+    }
+
+    public Collection<Employee> getAll(){
+        return employees.values();
+    }
+
+    public Employee get(Integer id){
+        return employees.get(id);
+    }
+
+    public void delete(Integer id){
+        employees.remove(id);
+    }
+
+}
+```
+
+![image-20250202161632484](./assets/image-20250202161632484.png)
+
+![image-20250202161803803](./assets/image-20250202161803803.png)
 
 ### 2、功能清单
 
-
+| 功能               | URL地址     | 请求方式 |
+| ------------------ | ----------- | -------- |
+| 访问首页           | /           | get      |
+| 查询全部数据       | /employee   | get      |
+| 删除               | /employee/2 | delete   |
+| 跳转到添加数据页面 | /toAdd      | get      |
+| 执行保存           | /employee   | post     |
+| 跳转到数据更新页面 | /employee/2 | get      |
+| 执行更新           | /employee   | get      |
 
 
 
@@ -1089,7 +1155,324 @@ b>当前请求必须传输请求参数_method
 
 #### a>配置view-controller
 
+```
+<mvc:view-controller path="/" view-name="index"></mvc:view-controller>
+```
+
+#### b>创建页面
 
 
-b>创建
+
+4、具体功能：查询所有员工数据
+
+a>控制器方法
+
+
+
+
+
+7、具体功能：执行报错
+
+​	a>控制器方法
+
+
+
+8、具体功能：跳转到更新数据页面
+
+a>修改超链接
+
+
+
+b>控制器方法
+
+
+
+c>创建employee_update.html
+
+
+
+9、具体功能：执行更新
+
+a>控制器方法
+
+
+
+---
+
+准备工作：
+
+![image-20250203190327114](./assets/image-20250203190327114.png)
+
+
+
+### 八、HTTPmessageConverter
+
+HttpMessageConverter，报文信息转换器，将请求报文转换为java对象，或将]ava对象转换为响应报文
+
+HttpMessageConverter提供了两个注解和两个类型：@RequestBody，@ResponseBody，RequestEntity，ResponseEntity
+
+#### 1、@RequestBody
+
+@RequestBody可以获取请求体，需要在控制器方法设置一个形参，使用@RequestBody进行标识，当前请求的请求体就会为当前注解所标识的形参赋值
+
+```
+<form th:action="@{/testRequestBody}" method="post">
+  用户名：<input type="text" name="username">
+  密码：<input type="password" name="password">
+  <input type="submit" value="测试@RequestBody">
+</form>
+```
+
+```java
+@RequestMapping("/testRequestBody")
+public String testRequestBody(@RequestBody String requestBody){
+    System.out.println("requestBody:"+requestBody);
+    return "success";
+}
+```
+
+输出结果：
+requestBody：username=admin&password=123456
+
+#### 2、RequestEntity
+
+RequestEntity封装请求报文的一种类型，需要在控制器方法的形参中设置该类型的形参，当前请求的请求报文就会赋值给该形参，可以通过getHeaders()获取请求头信息，通过getBody()获取请求体信息
+
+![image-20250203191635829](./assets/image-20250203191635829.png)
+
+```java
+@RequestMapping("/testRequestEntity")
+    public String testRequestEntity(RequestEntity<String> requestEntity){
+//    当前requestEntity表示整个请求报文
+        System.out.println("请求头："+requestEntity.getHeaders());
+        System.out.println("请求体："+requestEntity.getBody());
+        return "success";
+    }
+```
+
+输出结果：
+
+请求头：[host:"localhost:8080", connection:"keep-alive", content-length:"21", cache-control:"max-age=0", sec-ch-ua:""Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"", sec-ch-ua-mobile:"?0", sec-ch-ua-platform:""Windows"", origin:"http://localhost:8080", upgrade-insecure-requests:"1", user-agent:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0", accept:"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7", sec-fetch-site:"same-origin", sec-fetch-mode:"navigate", sec-fetch-user:"?1", sec-fetch-dest:"document", referer:"http://localhost:8080/springMVC/", accept-encoding:"gzip, deflate, br, zstd", accept-language:"zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6", Content-Type:"application/x-www-form-urlencoded;charset=UTF-8"]
+请求体：username=1&password=2
+
+#### 3、@Reponsebody
+
+@ResponseBody用于标识一个控制器方法，可以将该方法的返回值直接作为响应报文的响应体响应到浏览器
+
+![image-20250203194349054](./assets/image-20250203194349054.png)
+
+```
+@RequestMapping("/testResponse")
+public void testResponse(HttpServletResponse response) throws IOException {
+    response.getWriter().println("hello,response");
+}
+```
+
+```
+@RequestMapping("/testResponseBody")
+@ResponseBody
+public String testResponseBody() {
+    return "success2";
+}
+```
+
+结果：浏览器页面显示success2
+
+#### 4、SpringMVC处理json
+
+@ResponseBody处理json的步骤:
+
+a>导入jackson的依赖
+
+```
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.18.2</version>
+</dependency>
+```
+
+b>在SpringMVC的核心配置文件中开启mvc的注解驱动，此时在HandlerAdaptor中会自动装配一个消息转换器:Mappingjackson2HttpMessageConverter，可以将响应到浏览器的java对象转换为json格式的字符串
+
+```
+<mvc:annotation-driven/>
+```
+
+c>在处理器方法上使用@ResponseBody注解进行标识
+
+d>将java对象直接作为控制器方法的返回值返回，就会自动转换为Json格式的字符串
+
+```
+@RequestMapping("/testResponseUser")
+@ResponseBody
+public User testResponseUser() {
+    return new User(1001,"admin","123456",23,"0");
+}
+```
+
+
+
+#### 5、SpringMVC处理ajax
+
+![image-20250203202015959](./assets/image-20250203202015959.png)
+
+a>请求超链接:
+
+![image-20250203202151998](./assets/image-20250203202151998.png)
+
+```
+
+```
+
+b>通过vue和axios处理点击事件:
+
+![image-20250203202223277](./assets/image-20250203202223277.png)
+
+```
+
+```
+
+c>控制器方法
+
+![image-20250203202321758](./assets/image-20250203202321758.png)
+
+#### 6、@RestController注解
+
+@RestController注解是springMVC提供的一个复合注解，标识在控制器的类上，就相当于为类添加了@Controller注解，并且为其中的每个方法添加了@ResponseBody注解
+
+#### 7、ResponseEntity
+
+ResponseEntity用于控制器方法的返回值类型，该控制器方法的返回值就是响应到浏览器的响应报文
+
+### 九、文件上传下载
+
+使用ResponseEntity实现下载文件的功能
+
+```java
+package com.atguigu.mvc.controller;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * @Description:
+ * @Author Eva
+ * @Date 2025/2/3 20:40
+ */
+@Controller
+public class FileUpAndDownController {
+    @RequestMapping("/testDown")
+    public ResponseEntity<byte[]> testResponseEntity(HttpSession session)throws IOException {
+        //获职ServletContext对象
+        ServletContext servletContext = session.getServletContext();
+        //获取服务器中文件的真实路径
+        String realPath=servletContext.getRealPath("/static/img/1.jepg");
+        //创建输入流
+        InputStream is = new FileInputStream(realPath);
+        //创建字节数组
+        byte[] bytes = new byte[is.available()];
+        //将流读到字节数组中
+        is.read(bytes);
+        //创建HttpHeaders对象设照响应头信息
+        MultiValueMap<String, String> headers = new HttpHeaders();
+        //设霄要下载方式以及下载文件的名字
+        headers.add("Content-Disposition","attachment;filename=1.jepg");
+        //设置响应状态码
+        HttpStatus statusCode = HttpStatus.OK;
+        //创建ResponseEntity对象
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(bytes, headers,statusCode);
+        //关闭输入流
+        is.close();
+        return responseEntity;
+    }
+
+}
+
+```
+
+
+
+#### 1、文件上传
+
+文件上传要求form表单的请求方式必须为post，并且添加属性"enctype=multipart/form·data"
+
+SpringMVC中将上传的文件封装到MultipartFile对象中，通过此对象可以获取文件相关信息上传步骤:
+
+a>添加依赖:
+
+```
+<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+<dependency>
+    <groupId>commons-fileupload</groupId>
+    <artifactId>commons-fileupload</artifactId>
+    <version>1.5</version>
+</dependency>
+```
+
+b>在SpringMVC的配置文件中添加配置:
+
+```
+
+```
+
+
+
+#### 2、文件下载
+
+```
+
+```
+
+
+
+### 十、拦截器
+
+#### 1、拦截器的配置
+
+SpringMVC中的拦截器用于拦截控制器方法的执行
+
+SpringMVC中的拦截器需要实现HandlerInterceptor或者继承HandlerInterceptorAdapter类
+
+SpringMVC的拦截器必须在SpringMVC的配置文件中进行配置:
+
+```
+
+```
+
+
+
+#### 2、拦截器的三个抽象方法
+
+
+
+#### 3、多个拦截器的执行顺序
+
+
+
+### 十一、异常处理器
+
+#### 1、基于配置的异常处理
+
+
+
+#### 2、基于注解的异常处理
+
+
+
+### 十二、注解配置SpringMVC
+
+#### 1、创建初始化类，代替web.xml
+
+
 

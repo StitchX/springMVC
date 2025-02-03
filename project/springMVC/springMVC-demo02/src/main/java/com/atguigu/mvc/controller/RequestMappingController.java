@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
  */
 
 @Controller
-//@RequestMapping("/hello")
+@RequestMapping("/hello")
 public class RequestMappingController {
 
 //    @RequestMapping("/testRequestMapping")
